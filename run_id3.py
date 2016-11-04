@@ -10,14 +10,17 @@ if __name__ == '__main__':
     state = 0
     # Read each input line
     for line in sys.stdin:
-        # Ignore comments
         line = line.strip("\n")
+
+        # Ignore comments
         if line.startswith("%"):
             continue
+
         if state == 0:
             # Parse attributes
             if line.startswith("@attribute"):
                 feature_names.append(line.split()[1])
+
             # Parse data
             elif line.startswith("@data"):
                 state = 1
