@@ -29,4 +29,4 @@ if __name__ == '__main__':
     X = data[:, 0:-1]
 
     tree = DecisionTree()
-    tree.fit(X, y, feature_names)
+    tree.fit(X, y, feature_names[0:-1])
