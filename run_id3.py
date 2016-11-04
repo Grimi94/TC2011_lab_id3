@@ -30,3 +30,4 @@ if __name__ == '__main__':
 
     tree = DecisionTree()
     tree.fit(X, y, feature_names[0:-1])
+    print str(tree)
