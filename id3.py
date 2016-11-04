@@ -11,6 +11,9 @@ class DecisionTree(object):
 
 
     def _information_gain(self, y, subsets):
+        """
+        Calculate information of subsets
+        """
         n             = y.shape[0]
         child_entropy = 0
 
@@ -20,7 +23,7 @@ class DecisionTree(object):
         return self._entropy(y) - child_entropy
 
 
-    def _build_tree(self, X, y, feature_names):
+    def _build_tree(self, X, y, feature_names, level=0):
         node = TreeNode()
         split_column, split_values, splits = self._choose_split_column(X, y)
 
@@ -29,17 +32,21 @@ class DecisionTree(object):
             node.leaf    = True
             node.classes = Counter(y)
             node.name    = node.classes.most_common(1)[0][0]
+            print " " * level, node.name
         else:
             node.name   = self.feature_names[split_column]
             node.column = split_column
 
             # For every split value we subset X and y and recurse down
             for idx, split_value in enumerate(split_values):
+
                 new_X = np.delete(X, split_column, axis=1)
+                new_feature_names = np.delete(feature_names, split_column)
                 new_X = new_X[splits[idx]]
                 new_y = y[splits[idx]]
-                new_feature_names = np.delete(feature_names, split_column, axis=0)
-                node.children[split_value] = self._build_tree(new_X, new_y, new_feature_names)
+                print " " * level, node.name
+                print " " * level, split_value, feature_names, feature_names[split_column],  new_feature_names
+                node.children[split_value] = self._build_tree(new_X, new_y, new_feature_names, level + 1)
 
         return node
 
@@ -60,10 +67,16 @@ class DecisionTree(object):
 
 
     def predict(self, X):
+        """
+        Currently not implemented
+        """
         pass
 
 
     def _entropy(self, y):
+        """
+        Calculates the entropy of a given array
+        """
         # Get size
         n         = y.shape[0]
         summation = 0
@@ -104,11 +117,32 @@ class DecisionTree(object):
 
         return split_column, split_values, splits
 
+    def __str__(self):
+        return str(self.root)
+
 
 class TreeNode(object):
     def __init__(self):
-        self.feature_name = None
-        self.children     = {}
-        self.column       = None
-        self.leaf         = False
-        self.classes      = None
+        self.name     = None
+        self.children = {}
+        self.column   = None
+        self.leaf     = False
+        self.classes  = None
+
+    def describe(self, level=0, ):
+        result = ""
+
+        if not self.leaf:
+            for key, val in self.children.iteritems():
+                result += "  " * level
+                result += self.name + ": " + key + "\n"
+                result += val.describe(level + 1)
+        else:
+            result += "  " * level
+            result += "ANSWER: " + self.classes.keys()[0] + '\n'
+
+        return result
+
+
+    def __repr__(self):
+        return self.describe()
