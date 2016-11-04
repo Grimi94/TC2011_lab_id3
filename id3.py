@@ -32,9 +32,8 @@ class DecisionTree(object):
             node.leaf    = True
             node.classes = Counter(y)
             node.name    = node.classes.most_common(1)[0][0]
-            print " " * level, node.name
         else:
-            node.name   = self.feature_names[split_column]
+            node.name   = feature_names[split_column]
             node.column = split_column
 
             # For every split value we subset X and y and recurse down
@@ -44,8 +43,6 @@ class DecisionTree(object):
                 new_feature_names = np.delete(feature_names, split_column)
                 new_X = new_X[splits[idx]]
                 new_y = y[splits[idx]]
-                print " " * level, node.name
-                print " " * level, split_value, feature_names, feature_names[split_column],  new_feature_names
                 node.children[split_value] = self._build_tree(new_X, new_y, new_feature_names, level + 1)
 
         return node
