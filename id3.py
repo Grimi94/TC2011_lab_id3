@@ -5,9 +5,10 @@ from collections import Counter
 class DecisionTree(object):
 
     def __init__(self):
-        self.root          = None
-        self.feature_names = None
-        self.categorical   = None
+        self.root           = None
+        self.feature_names  = None
+        self.categorical    = None
+        self.feature_values = None
 
 
     def _information_gain(self, y, subsets):
@@ -23,7 +24,7 @@ class DecisionTree(object):
         return self._entropy(y) - child_entropy
 
 
-    def _build_tree(self, X, y, feature_names, level=0):
+    def _build_tree(self, X, y, feature_names):
         node = TreeNode()
         split_column, split_values, splits = self._choose_split_column(X, y)
 
@@ -35,6 +36,7 @@ class DecisionTree(object):
         else:
             node.name   = feature_names[split_column]
             node.column = split_column
+            node.values = self.feature_values[node.name]
 
             # For every split value we subset X and y and recurse down
             for idx, split_value in enumerate(split_values):
@@ -43,17 +45,18 @@ class DecisionTree(object):
                 new_feature_names = np.delete(feature_names, split_column)
                 new_X = new_X[splits[idx]]
                 new_y = y[splits[idx]]
-                node.children[split_value] = self._build_tree(new_X, new_y, new_feature_names, level + 1)
+                node.children[split_value] = self._build_tree(new_X, new_y, new_feature_names)
 
         return node
 
 
-    def fit(self, X, y, feature_names=None):
+    def fit(self, X, y, feature_names=None, feature_values=None):
+        self.feature_values = feature_values
+
         if feature_names is None or len(feature_names) != X.shape[1]:
             self.feature_names = np.arange(X.shape[1])
         else:
             self.feature_names = feature_names
-
 
         is_categorical   = lambda x: isinstance(x, str) or \
                            isinstance(x, bool) or \
@@ -122,21 +125,29 @@ class TreeNode(object):
     def __init__(self):
         self.name     = None
         self.children = {}
+        self.values   = None
         self.column   = None
         self.leaf     = False
         self.classes  = None
 
-    def describe(self, level=0, ):
-        result = ""
+    def describe(self, level=0, suffix=""):
+        result = suffix
 
         if not self.leaf:
-            for key, val in self.children.iteritems():
+            #TODO: finish loop
+            for node_name in self.values:
+                child = self.children[node_name]
                 result += "  " * level
-                result += self.name + ": " + key + "\n"
-                result += val.describe(level + 1)
+                result += self.name + ": " + node_name
+                result += child.describe(level + 1, "\n")
+
+            # for key, val in self.children.iteritems():
+            #     result += "  " * level
+            #     result += self.name + ": " + key
+            #     result += val.describe(level + 1, "\n")
         else:
             result += "  " * level
-            result += "ANSWER: " + self.classes.keys()[0] + '\n'
+            result += "ANSWER: " + self.classes.keys()[0] + "\n"
 
         return result
 
