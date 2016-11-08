@@ -6,6 +6,7 @@ from id3 import DecisionTree
 
 if __name__ == '__main__':
     feature_names = []
+    feature_values = {}
     data = []
     state = 0
     # Read each input line
@@ -19,7 +20,11 @@ if __name__ == '__main__':
         if state == 0:
             # Parse attributes
             if line.startswith("@attribute"):
-                feature_names.append(line.split()[1])
+                # Parse attribute name
+                contents = line.replace("{", "").replace("}", "").replace(",", "").split()
+                feature_names.append(contents[1])
+                # Parse possible attribute values
+                feature_values[contents[1]] = contents[2:]
 
             # Parse data
             elif line.startswith("@data"):
@@ -32,5 +37,5 @@ if __name__ == '__main__':
     X = data[:, 0:-1]
 
     tree = DecisionTree()
-    tree.fit(X, y, feature_names[0:-1])
-    print str(tree)
+    tree.fit(X, y, feature_names[0:-1], feature_values)
+    print str(tree).strip("\n")
